@@ -17,6 +17,16 @@ const mockUsers = [{id: 1,uName:"Alok", gpa: 3.8},
     {id: 3,uName:"Chaitu", gpa: 5.0},
     {id: 4,uName:"Abhi", gpa: 7.0}]
 
+const resolveUserByIndex = (req,res,next)=>{
+    const {body, params: {id}} = req;
+    const parsedId = parseInt(id);
+    if(isNaN(parsedId)) return res.sendStatus(400);
+    const findUserIndex = mockUsers.findIndex((user)=> user.id === parsedId);
+    if(findUserIndex === -1) return res.sendStatus(400);
+    req.findUserIndex = findUserIndex;
+    next();
+}
+
 // Using Middleware for all requests
 // app.use(loggingMiddleware);
 
@@ -53,17 +63,9 @@ app.get("/api/users/:id",(req,res)=>{
     return res.send(findUser);
 });
 
-app.put("/api/users/:id",(req,res)=>{
-    const {body, params: {id}} = req;
-    const parsedId = parseInt(id);
-    if(isNaN(parsedId)) return res.sendStatus(400);
-
-    const findUserIndex = mockUsers.findIndex((user)=> user.id === parsedId);
-
-    if(findUserIndex === -1) return res.sendStatus(400);
-
-    mockUsers[findUserIndex] = { id: parsedId, ...body};
-
+app.put("/api/users/:id",resolveUserByIndex,(req,res)=>{
+    const {body,findUserIndex} = req;
+    mockUsers[findUserIndex] = { id: mockUsers[findUserIndex].id, ...body};
     return res.sendStatus(201);
 });
 
@@ -83,14 +85,10 @@ app.patch("/api/users/:id",(req,res)=>{
 
 app.delete("/api/users/:id",(req,res)=>{
     const {params: {id}} = req;
-
     const parsedId = parseInt(id);
     if(isNaN(parsedId)) return res.sendStatus(400);
-
     const findUserIndex = mockUsers.findIndex((user)=> user.id === parsedId);
-
     if(findUserIndex === -1) return res.sendStatus(400);
-
     mockUsers.splice(findUserIndex,1);
 
     return res.status(204);
