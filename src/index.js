@@ -1,4 +1,5 @@
-import express from "express"
+import express from "express";
+import {query} from "express-validator";
 
 const app = express();
 
@@ -28,7 +29,7 @@ const resolveUserByIndex = (req,res,next)=>{
 }
 
 // Using Middleware for all requests
-// app.use(loggingMiddleware);
+app.use(loggingMiddleware);
 
 app.get("/",(req,res,next)=>{
     console.log("Hello Sir I wont let u go to next Middleware");
@@ -37,7 +38,7 @@ app.get("/",(req,res,next)=>{
     res.status(201).send({msg:"Hello"});
 });
 
-app.get("/api/users",(req,res)=>{
+app.get("/api/users", query('filter').isString(), (req,res)=>{
     const {query:{filter, value}} = req;
     if( filter && value) 
         return res.send(
