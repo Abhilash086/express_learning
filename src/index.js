@@ -1,5 +1,5 @@
 import express from "express";
-import {query} from "express-validator";
+import {query, validationResult, body} from "express-validator";
 
 const app = express();
 
@@ -40,6 +40,11 @@ app.get("/",(req,res,next)=>{
 
 app.get("/api/users", query('filter').isString(), (req,res)=>{
     const {query:{filter, value}} = req;
+    const result = validationResult(req);
+    if(!result.isEmpty())
+        return res.status(400).send({errors: result.array()});
+    
+    console.log(result);
     if( filter && value) 
         return res.send(
             mockUsers.filter((user)=>user[filter].includes(value))
@@ -47,12 +52,18 @@ app.get("/api/users", query('filter').isString(), (req,res)=>{
     return res.send(mockUsers);
 });
 
-app.post('/api/users',(req,res)=>{
-    console.log(req.body);
-    const { body } = req;
-    const newUser = {id: mockUsers[mockUsers.length-1].id + 1, ...body};
-    mockUsers.push(newUser);
-    return res.status(201).send(newUser);
+app.post('/api/users',body('uName')
+                    .notEmpty()
+                    .withMessage("Cannot be empty")
+                    .isLength({min: 5, max: 32})
+                    .withMessage("Name should be between 5 and 32 characters")
+    ,(req,res)=>{
+        const result = validationResult(req);
+        console.log(result);
+        const { body } = req;
+        const newUser = {id: mockUsers[mockUsers.length-1].id + 1, ...body};
+        mockUsers.push(newUser);
+        return res.status(201).send(newUser);
 });
 
 app.get("/api/users/:id",(req,res)=>{
