@@ -1,5 +1,6 @@
 import express from "express";
-import {query, validationResult, body, matchedData} from "express-validator";
+import {query, validationResult, body, matchedData, checkSchema} from "express-validator";
+import { createUserValidationSchema, createQuerySchema } from "./utils/validationSchemas.js";
 
 const app = express();
 
@@ -38,10 +39,14 @@ app.get("/",(req,res,next)=>{
     res.status(201).send({msg:"Hello"});
 });
 
-app.get("/api/users", query('filter').isString(), (req,res)=>{
+app.get("/api/users", checkSchema(createQuerySchema), (req,res)=>{
     const {query:{filter, value}} = req;
     const result = validationResult(req);
     console.log(result);
+
+    if(!result.isEmpty())
+        return res.status(400).send({errors: result.array()});
+    
     if( filter && value) 
         return res.send(
             mockUsers.filter((user)=>user[filter].includes(value))
@@ -49,13 +54,7 @@ app.get("/api/users", query('filter').isString(), (req,res)=>{
     return res.send(mockUsers);
 });
 
-app.post('/api/users',[body('uName')
-                    .notEmpty()
-                    .withMessage("Cannot be empty")
-                    .isLength({min: 5, max: 32})
-                    .withMessage("Name should be between 5 and 32 characters"),
-                    body('gpa').notEmpty()]
-    ,(req,res)=>{
+app.post('/api/users',checkSchema(createUserValidationSchema),(req,res)=>{
         const result = validationResult(req);
         console.log(result);
 
