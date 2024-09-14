@@ -1,6 +1,7 @@
 import { Router } from "express";
-import { query, checkSchema, validationResult} from "express-validator"
-import { createQuerySchema } from "../utils/validationSchemas.js";
+import { query, checkSchema, validationResult, matchedData} from "express-validator"
+import { createQuerySchema, createUserValidationSchema } from "../utils/validationSchemas.js";
+import { mockUsers } from "../utils/constants.js";
 
 const router = Router();
 
@@ -17,6 +18,19 @@ router.get("/api/users", checkSchema(createQuerySchema), (req,res)=>{
             mockUsers.filter((user)=>user[filter].includes(value))
         );
     return res.send(mockUsers);
+});
+
+router.post('/api/users',checkSchema(createUserValidationSchema),(req,res)=>{
+    const result = validationResult(req);
+    console.log(result);
+
+    if(!result.isEmpty())
+        return res.status(400).send({errors: result.array()});
+
+    const data = matchedData(req);
+    const newUser = {id: mockUsers[mockUsers.length-1].id + 1, ...data};
+    mockUsers.push(newUser);
+    return res.status(201).send(newUser);
 });
 
 
