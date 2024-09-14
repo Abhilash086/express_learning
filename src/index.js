@@ -1,6 +1,7 @@
 import express from "express";
 import {query, validationResult, body, matchedData, checkSchema} from "express-validator";
 import { createUserValidationSchema, createQuerySchema } from "./utils/validationSchemas.js";
+import usersRouter from "./routes/users.js"
 
 const app = express();
 
@@ -13,11 +14,6 @@ const loggingMiddleware = (req,res,next)=>{
     console.log(req.method+" "+req.url);
     next();
 }
-
-const mockUsers = [{id: 1,uName:"Alok", gpa: 3.8},
-    {id: 2,uName:"Bhargav", gpa: 4.0},
-    {id: 3,uName:"Chaitu", gpa: 5.0},
-    {id: 4,uName:"Abhi", gpa: 7.0}]
 
 const resolveUserByIndex = (req,res,next)=>{
     const {body, params: {id}} = req;
@@ -32,26 +28,14 @@ const resolveUserByIndex = (req,res,next)=>{
 // Using Middleware for all requests
 app.use(loggingMiddleware);
 
+// Registering the usersRouter to access it here from router level
+app.use(usersRouter);
+
 app.get("/",(req,res,next)=>{
     console.log("Hello Sir I wont let u go to next Middleware");
     next();
 },(req,res)=>{
     res.status(201).send({msg:"Hello"});
-});
-
-app.get("/api/users", checkSchema(createQuerySchema), (req,res)=>{
-    const {query:{filter, value}} = req;
-    const result = validationResult(req);
-    console.log(result);
-
-    if(!result.isEmpty())
-        return res.status(400).send({errors: result.array()});
-    
-    if( filter && value) 
-        return res.send(
-            mockUsers.filter((user)=>user[filter].includes(value))
-        );
-    return res.send(mockUsers);
 });
 
 app.post('/api/users',checkSchema(createUserValidationSchema),(req,res)=>{
