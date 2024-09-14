@@ -63,8 +63,12 @@ router.patch("/api/users/:id",resolveUserByIndex,(req,res)=>{
 
 router.delete("/api/users/:id",resolveUserByIndex,(req,res)=>{
     const {findUserIndex} = req;
+    
+    if(findUserIndex === -1)
+        return res.status(400);
+
     mockUsers.splice(findUserIndex,1);
-    return res.status(204);
+    return res.sendStatus(204);
 }); 
 
 export default router;

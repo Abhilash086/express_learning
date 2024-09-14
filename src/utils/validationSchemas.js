@@ -1,5 +1,3 @@
-import {query, validationResult, body, matchedData} from "express-validator";
-
 // export const createUserValidationSchema = [body('uName')
 //     .notEmpty()
 //     .withMessage("Cannot be empty")
