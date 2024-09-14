@@ -6,10 +6,8 @@ import { resolveUserByIndex } from "../utils/middlewares.js";
 
 const router = Router();
 
-router.get("/",(req,res,next)=>{
-    console.log("Hello Sir I wont let u go to next Middleware");
-    next();
-},(req,res)=>{
+router.get("/",(req,res)=>{
+    res.cookie("hello","world",{maxAge: 60000 * 60 * 2});
     res.status(201).send({msg:"Hello"});
 });
 
