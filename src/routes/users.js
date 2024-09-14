@@ -7,7 +7,7 @@ import { resolveUserByIndex } from "../utils/middlewares.js";
 const router = Router();
 
 router.get("/",(req,res)=>{
-    res.cookie("hello","world",{maxAge: 60000 * 60 * 2});
+    res.cookie("hello","world",{maxAge: 60000, signed: true});
     res.status(201).send({msg:"Hello"});
 });
 
