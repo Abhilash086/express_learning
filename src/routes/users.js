@@ -7,7 +7,10 @@ import { resolveUserByIndex } from "../utils/middlewares.js";
 const router = Router();
 
 router.get("/",(req,res)=>{
-    res.cookie("hello","world",{maxAge: 60000, signed: true});
+    // res.cookie("hello","world",{maxAge: 60000, signed: true});
+    console.log(req.session);
+    console.log(req.sessionID);
+    req.session.visited = true;
     res.status(201).send({msg:"Hello"});
 });
 
@@ -22,14 +25,17 @@ router.get("/api/users", checkSchema(createQuerySchema), (req,res)=>{
     const {query:{filter, value}} = req;
     const result = validationResult(req);
     console.log(result);
+    console.log(req.session);
+    console.log(req.session.id);
 
     // if(!result.isEmpty())
     //     return res.status(400).send({errors: result.array()});
     
-    if( filter && value) 
+    if( filter && value){
         return res.send(
             mockUsers.filter((user)=>user[filter].includes(value))
         );
+    }
     return res.send(mockUsers);
 });
 
